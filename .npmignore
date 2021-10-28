@@ -1,0 +1,3 @@
+# ignore source dir for publishing
+lib
+package-lock.json
