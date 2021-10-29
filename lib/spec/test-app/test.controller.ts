@@ -1,8 +1,8 @@
 import { Controller, Get } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
-import { Paginate, Paginated, PaginateParams } from "../../paginators";
-import { SortAndFilter, SortAndFilterParams } from "../../sort-and-filter";
+import { paginate, Paginate, Paginated, PaginateParams } from "../../paginators";
+import { sortAndFilter, SortAndFilter, SortAndFilterParams } from "../../sort-and-filter";
 import { Test } from "./test.entity";
 
 @Controller('tests')
@@ -23,5 +23,18 @@ export class TestController {
 			.createQueryBuilder('test')
 			.sortAndFilter(sortAndFilterParams)
 			.paginate(paginateParams);
+	}
+
+	@Get('repo')
+	async repo(
+	    @Paginate({
+	      maxPageSize: 100
+	    }) paginateParams: PaginateParams,
+	    @SortAndFilter({
+	      sortable: ['name', 'email'],
+	      filterable: ['name', 'createdAt'],
+	    }) sortAndFilterParams: SortAndFilterParams,
+	): Promise<Paginated<Test>> {
+		return paginate(this.testRepository, paginateParams, sortAndFilter(sortAndFilterParams));
 	}
 }
