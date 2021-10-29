@@ -101,15 +101,52 @@ Additionally we provide metainformation, for you to display page counts, record 
 
 ## Sort And Filter
 
+Sorting and filtering both use the `@SortAndFilter` decorator, which will give you a `SortAndFilterParams` to pass to your choice of helper.
 
+```typescript
+// for query builder we use .sortAndFilter
+await this.someRepository
+  .createQueryBuilder()
+  .sortAndFilter(sortAndFilterParams)
+  .getMany();
+
+// you can use the sortAndFilter helper to make a FindOptions
+// for use in the repository .find method
+await this.someRepository.find(sortAndFilter(sortAndFilterParams))
+```
+
+This can also be combined with pagination.
+
+```typescript
+// query builder
+await this.someRepository
+  .createQueryBuilder()
+  .sortAndFilter(sortAndFilterParams)
+  .paginate(paginateParams);
+
+// repository
+await paginate(this.someRepository, paginateParams, sortAndFilter(sortAndFilterParams));
+```
 
 ## Sorting
 
+When you enable sorting on your api endpoint, the endpoint will now accept a `sort` query parameter.
+
+The sort query parameter accepts a comma seperated list of fields to order by. To reverse a sort column, prefix it with a `-`
+
+Usage example:
+
+`http://localhost/api/some_api?sort=name,-email`
+
 ## Filtering
 
-By enabling filtering on your API endpoint you enable a range of available
-search, the general format for such a search is:
+By enabling filtering on your API endpoint you enable a range of available searches, the general format for such a search is:
+
 `http://localhost/api/some_api?filter=attr__operator:search`
+
+You can filter against multiple attribute by separating them with columns, for example:
+
+`http://localhost/api/some_api?filter=name__icontains:bob,age__gt:25`
 
 A list of all operators are as follows:
 
@@ -125,3 +162,4 @@ A list of all operators are as follows:
 | `lte`                | less than or equal to        |
 | `startswith`         | starts with                  |
 | `endswith`           | ends with                    |
+
