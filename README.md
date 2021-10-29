@@ -138,6 +138,12 @@ Usage example:
 
 `http://localhost/api/some_api?sort=name,-email`
 
+You can also sort across `ManyToOne` relationships by using dot notation. Note
+that this only works if you are using the Query Builder helps due to TypeORM
+limitations:
+
+`http://localhost/api/some_api?sort=profile.name`
+
 ## Filtering
 
 By enabling filtering on your API endpoint you enable a range of available searches, the general format for such a search is:
