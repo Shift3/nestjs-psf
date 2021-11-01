@@ -5,6 +5,6 @@ import * as faker from 'faker';
 export class TestFactory extends Factory<Test> {
 	entity = Test;
 
-	name = new Sequence((i: number) => `Name ${i}`)
-	email = faker.internet.email();
+	name = new Sequence((i: number) => `Name ${i}`);
+	email = new Sequence(() => faker.internet.email());
 }

@@ -3,27 +3,16 @@ import { expect } from "chai";
 import { Paginate, PaginateConfig, PaginateParams } from "../paginators";
 
 describe('@Paginate', () => {
-	it('interprets page query params', () => {
+	it('interprets page size query params', () => {
 		const executionContext = executionContextWithQueryParams({
-			page: 50,
 			pageSize: 100
 		})
 
 		const factory = getPaginationFactory();
 		const result = factory(executionContext);
 
-		expect(result.page).to.eq(50);
 		expect(result.pageSize).to.eq(100);
 	});
-
-	it('defaults page to 1 if not provided', () => {
-		const executionContext = executionContextWithQueryParams({})
-
-		const factory = getPaginationFactory();
-		const result = factory(executionContext);
-
-		expect(result.page).to.eq(1);
-	})
 
 	it('it passes the called url through', () => {
 		const executionContext = executionContextWithQueryParams({})
