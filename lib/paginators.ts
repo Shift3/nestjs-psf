@@ -11,7 +11,8 @@ export interface PaginateParams {
 };
 
 export interface PaginateConfig {
-  maxPageSize?: number
+  maxPageSize?: number,
+  defaultPageSize?: number,
   paginator?: new(params: PaginateParams) => Paginator,
 };
 
@@ -20,7 +21,7 @@ export const Paginate = createParamDecorator<PaginateConfig>((config: PaginateCo
   const baseUrl = `${req.protocol}://${req.get('host')}${req.baseUrl}${req.path}`;
   const paginator = config.paginator || PagedPaginator;
 
-  let pageSize = parseInt(req.query.pageSize) || 10;
+  let pageSize = parseInt(req.query.pageSize) || config.defaultPageSize || 10;
   if (config.maxPageSize) {
     pageSize = Math.min(pageSize, config.maxPageSize)
   }
