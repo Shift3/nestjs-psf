@@ -1,6 +1,6 @@
 {
   "name": "nestjs-psf",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Sort, Paginate, and Filter helpers for NestJS",
   "scripts": {
     "prebuild": "rimraf dist",
