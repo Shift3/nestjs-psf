@@ -58,6 +58,19 @@ describe('@Paginate', () => {
 		expect(result.pageSize).to.eq(20);
 	})
 
+
+	it('respects pageSize query param over defaultPageSize', () => {
+		const executionContext = executionContextWithQueryParams({
+			pageSize: 30
+		});
+
+		const factory = getPaginationFactory({
+			defaultPageSize: 20
+		});
+		const result = factory(executionContext);
+
+		expect(result.pageSize).to.eq(30);
+	})
 })
 
 function executionContextWithQueryParams(query: any) {
