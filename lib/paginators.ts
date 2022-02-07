@@ -187,7 +187,10 @@ SelectQueryBuilder.prototype.paginate = async function<Entity>(this: SelectQuery
   return paginator.paginate(this);
 }
 
-export const paginate = async <T extends ObjectLiteral>(repo: Repository<T>, params: PaginateParams, options?: FindManyOptions<T>): Promise<Paginated<T>> => {
+// don't ask
+type NoInfer<T> = T extends infer S ? S : never;
+
+export const paginate = async <T extends ObjectLiteral>(repo: Repository<T>, params: PaginateParams, options?: FindManyOptions<NoInfer<T>>): Promise<Paginated<T>> => {
   const paginator = new params.paginator(params);
-  return await paginator.paginateRepo(repo, options);
+  return await paginator.paginateRepo(repo, options as FindManyOptions<T>);
 }

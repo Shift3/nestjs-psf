@@ -40,7 +40,7 @@
     "@nestjs/common": "^7.0.9 || ^8.0.0",
     "@nestjs/core": "^7.0.9 || ^8.0.0",
     "@nestjs/typeorm": "^8.0.0",
-    "typeorm": "^0.2.38",
+    "typeorm": "^0.2.41",
     "rxjs": "^7.3.0"
   }
 }
