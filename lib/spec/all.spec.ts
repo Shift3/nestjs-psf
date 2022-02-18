@@ -70,14 +70,16 @@ let testFactory = new TestFactory();
 			});
 
 			it('can do multiple filters, which are ANDed', async () => {
-				await testFactory.create({ name: 'find me!', email: 'find@me.com' });
+				const record = await testFactory.create({ name: 'find me!', email: 'find@cheese.com' });
+				await testFactory.create({ name: 'dont', email: 'shouldnt@showup.com' });
 
 				const res = await supertest(app.getHttpServer())
-					.get(api + '?filter=name__icontains:ME,email__endswidth=find@me.com')
+					.get(api + '?filter=name__icontains:ME,email__endswith:cheese.com')
 
 				const { body } = res;
 
 				expect(body.results.length).to.eq(1);
+				expect(body.results[0].id).to.eq(record.id);
 			});
 
 			it('can "not equals" filter', async () => {

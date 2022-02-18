@@ -16,7 +16,7 @@ export class TestController {
 	    }) paginateParams: PaginateParams,
 	    @SortAndFilter({
 	      sortable: ['name', 'email'],
-	      filterable: ['name', 'createdAt'],
+	      filterable: ['name', 'email', 'createdAt'],
 	    }) sortAndFilterParams: SortAndFilterParams,
 	): Promise<Paginated<Test>> {
 		return this.testRepository
@@ -32,7 +32,7 @@ export class TestController {
 	    }) paginateParams: PaginateParams,
 	    @SortAndFilter({
 	      sortable: ['name', 'email'],
-	      filterable: ['name', 'createdAt'],
+	      filterable: ['name', 'email', 'createdAt'],
 	    }) sortAndFilterParams: SortAndFilterParams,
 	): Promise<Paginated<Test>> {
 		return paginate(this.testRepository, paginateParams, sortAndFilter(sortAndFilterParams));

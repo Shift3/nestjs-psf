@@ -64,6 +64,7 @@ export const SortAndFilter = createParamDecorator<SortAndFilterConfig>((config: 
       let key = splits[0];
       const value = splits.slice(1).join(':');
 
+
       if (key && value) {
         let op = SearchOps.EQUALS;
         if (key.indexOf('__') != -1) {
@@ -172,6 +173,7 @@ SelectQueryBuilder.prototype.sortAndFilter = function<Entity>(this: SelectQueryB
       }
 
       this.andWhere(`${this.alias}.${key} ${op} :filterValue${counter}`, { [`filterValue${counter}`]: param });
+      ++counter;
     }
   }
 
