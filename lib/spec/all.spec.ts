@@ -2,9 +2,42 @@ import { expect } from "chai";
 import supertest = require("supertest");
 import { TestFactory } from "./factories";
 import { app } from "./helper";
+import { SomeEnum } from "./test-app/test.entity";
 
 let testFactory = new TestFactory();
 
+
+context('QueryBuilder only', () => {
+	describe('Filtering with OR', () => {
+		it('can do multiple values, which are ORed', async () => {
+			const record = await testFactory.create({ name: 'find me!', email: 'find@cheese.com' });
+			await testFactory.create({ name: 'me too!', email: 'should@also.show' });
+			const res = await supertest(app.getHttpServer())
+				.get('/tests?filter=name__contains:find|too')
+
+			const { body } = res;
+
+			expect(body.results.length).to.eq(2);
+		});
+
+
+		it('can filter arrays by multiple values', async () => {
+			const record = await testFactory.create({
+				name: 'name',
+				email: 'email@email.com',
+			});
+			record.someArray = [SomeEnum.Choice1, SomeEnum.Choice3];
+			await record.save();
+
+
+			const url = `/tests?filter=someArray__has:2|1`;
+			const res = await supertest(app.getHttpServer()).get(url);
+			const { body } = res;
+
+			expect(body.results.length).to.eq(1);
+		});
+	});
+});
 
 // NOTE(justin): runs all tests for both repo and query builder controllers
 ['/tests', '/tests/repo'].forEach(api => {
@@ -82,6 +115,21 @@ let testFactory = new TestFactory();
 				expect(body.results[0].id).to.eq(record.id);
 			});
 
+			it('can filter arrays', async () => {
+				const record = await testFactory.create({
+					name: 'name',
+					email: 'email@email.com',
+				});
+				record.someArray = [SomeEnum.Choice1, SomeEnum.Choice3];
+				await record.save();
+
+				const url = `${api}?filter=someArray__has:2`;
+				const res = await supertest(app.getHttpServer()).get(url);
+				const { body } = res;
+
+				expect(body.results.length).to.eq(0);
+			});
+
 			it('can "not equals" filter', async () => {
 				await testFactory.create({ name: 'thing' });
 
@@ -103,7 +151,7 @@ let testFactory = new TestFactory();
 				await future.save();
 
 				const middle = new Date('2025-02-10');
-				const url = `/tests?filter=createdAt__lt:${(middle.toISOString())}`;
+				const url = `${api}?filter=createdAt__lt:${(middle.toISOString())}`;
 				const res = await supertest(app.getHttpServer())
 					.get(url)
 
