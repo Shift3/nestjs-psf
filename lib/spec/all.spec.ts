@@ -27,7 +27,13 @@ context('QueryBuilder only', () => {
 				email: 'email@email.com',
 			});
 			record.someArray = [SomeEnum.Choice1, SomeEnum.Choice3];
+			const record2 = await testFactory.create({
+				name: 'another',
+				email: 'record@email.com',
+			});
+			record2.someArray = [SomeEnum.Choice3];
 			await record.save();
+			await record2.save();
 
 
 			const url = `/tests?filter=someArray__has:2|1`;
