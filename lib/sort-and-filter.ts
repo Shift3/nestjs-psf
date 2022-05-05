@@ -1,7 +1,7 @@
 import {
     createParamDecorator, ExecutionContext
 } from '@nestjs/common';
-import { Equal, FindManyOptions, FindOperator, ILike, LessThan, LessThanOrEqual, Like, MoreThan, MoreThanOrEqual, Not, ObjectLiteral, SelectQueryBuilder } from 'typeorm';
+import { Brackets, Equal, FindManyOptions, FindOperator, ILike, In, LessThan, LessThanOrEqual, Like, MoreThan, MoreThanOrEqual, Not, ObjectLiteral, SelectQueryBuilder } from 'typeorm';
 
 export enum SearchOps {
   EQUALS     = 'eq',
@@ -13,7 +13,8 @@ export enum SearchOps {
   GTE        = 'gte',
   LTE        = 'lte',
   STARTSWITH = 'startswith',
-  ENDSWITH   = 'endswith'
+  ENDSWITH   = 'endswith',
+  HAS        = 'has',
 }
 
 export interface SortAndFilterParams {
@@ -107,6 +108,7 @@ const searchOpToOperator = {
   [SearchOps.LT]:         '<',
   [SearchOps.GTE]:        '>=',
   [SearchOps.LTE]:        '<=',
+  [SearchOps.HAS]:         '@>',
 };
 
 function NotEqual<T>(value: T | FindOperator<T>): FindOperator<T> {
@@ -125,9 +127,10 @@ const searchOpToTypeormOperator = {
   [SearchOps.LT]:         LessThan,
   [SearchOps.GTE]:        MoreThanOrEqual,
   [SearchOps.LTE]:        LessThanOrEqual,
+  [SearchOps.HAS]:        In,
 };
 
-function paramTransform(param: string, op: SearchOps) {
+function paramTransform(param: string, op: SearchOps): string {
   switch(op) {
     case SearchOps.CONTAINS:
     case SearchOps.ICONTAINS:
@@ -135,7 +138,7 @@ function paramTransform(param: string, op: SearchOps) {
     case SearchOps.STARTSWITH:
       return `${param}%`
     case SearchOps.ENDSWITH:
-      return `%${param}`
+      return `%${param}`;
   }
 
   return param;
@@ -166,14 +169,25 @@ SelectQueryBuilder.prototype.sortAndFilter = function<Entity>(this: SelectQueryB
     let counter = 0;
     for (let [key, value] of Object.entries(params.filter)) {
       let op = searchOpToOperator[value.op] || '=';
-      let param = paramTransform(value.value, value.op);
-
+      
       if (key.includes('.')) {
         key = buildSortAndFilterJoins(this, key, 'Filter');
       }
 
-      this.andWhere(`${this.alias}.${key} ${op} :filterValue${counter}`, { [`filterValue${counter}`]: param });
-      ++counter;
+      this.andWhere(new Brackets(qb => {
+        value.value.split('|').forEach(p => {
+          let filterValue: string | string[];
+          if (value.op === SearchOps.HAS)
+            filterValue = [ p ];
+          else
+            filterValue = paramTransform(p, value.op);
+
+          qb.orWhere(`${this.alias}.${key} ${op} :filterValue${counter}`, {
+            [`filterValue${counter}`]: filterValue
+          });
+          ++counter;
+        });
+      }));
     }
   }
 
@@ -191,13 +205,21 @@ export const sortAndFilter = <T extends ObjectLiteral>(params: SortAndFilterPara
   }
 
   if (params.filter) {
+    options.where = {};
     for (let [key, value] of Object.entries(params.filter)) {
-      options.where ||= {};
       
-      let param = paramTransform(value.value, value.op);
       const op = searchOpToTypeormOperator[value.op] || Equal;
 
-      options.where[key] = op(param);
+      if (value.value.includes('|')) {
+        // NOTE(justin): OR group
+        throw new Error('Repository does not support grouped OR\'s you must use the QueryBuilder.');
+      } else {
+        if (value.op === SearchOps.HAS) {
+          options.where[key] = [value.value];
+        } else {
+          options.where[key] = op(paramTransform(value.value, value.op));
+        }
+      }
     }
   }
 

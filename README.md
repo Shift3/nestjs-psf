@@ -168,4 +168,5 @@ A list of all operators are as follows:
 | `lte`                | less than or equal to        |
 | `startswith`         | starts with                  |
 | `endswith`           | ends with                    |
+| `has`                | array has any element        |
 
