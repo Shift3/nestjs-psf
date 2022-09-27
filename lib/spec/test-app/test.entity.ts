@@ -1,4 +1,5 @@
-import { BaseEntity, Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { BaseEntity, Column, CreateDateColumn, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { TestRelated } from "./test-related.entity";
 
 @Entity()
 export class Test extends BaseEntity {
@@ -16,4 +17,8 @@ export class Test extends BaseEntity {
 
 	@CreateDateColumn()
 	createdAt: Date;
+
+	@OneToOne(() => TestRelated, r => r)
+	@JoinColumn()
+	related: TestRelated;
 }

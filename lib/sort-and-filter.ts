@@ -147,7 +147,7 @@ function buildSortAndFilterJoins<Entity>(qb: SelectQueryBuilder<Entity>, dottedP
   const joinAlias = `leftJoinAnd${alias}_${related}_${attr}`;
   qb.leftJoinAndSelect(`${qb.alias}.${related}`, joinAlias);
 
-  return `${joinAlias}.${attr}`
+  return `"${joinAlias}"."${attr}"`
 }
 
 SelectQueryBuilder.prototype.sortAndFilter = function<Entity>(this: SelectQueryBuilder<Entity>, params: SortAndFilterParams) {
@@ -170,9 +170,11 @@ SelectQueryBuilder.prototype.sortAndFilter = function<Entity>(this: SelectQueryB
 
       if (key.includes('.')) {
         key = buildSortAndFilterJoins(this, key, 'Filter');
+        this.andWhere(`${key} ${op} :filterValue${counter}`, { [`filterValue${counter}`]: param });
+      } else {
+        this.andWhere(`${this.alias}.${key} ${op} :filterValue${counter}`, { [`filterValue${counter}`]: param });
       }
 
-      this.andWhere(`${this.alias}.${key} ${op} :filterValue${counter}`, { [`filterValue${counter}`]: param });
       ++counter;
     }
   }

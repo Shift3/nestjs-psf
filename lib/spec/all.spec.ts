@@ -1,9 +1,10 @@
 import { expect } from "chai";
 import supertest = require("supertest");
-import { TestFactory } from "./factories";
+import { TestFactory, TestRelatedFactory } from "./factories";
 import { app } from "./helper";
 
 let testFactory = new TestFactory();
+let testRelatedFactory = new TestRelatedFactory();
 
 
 // NOTE(justin): runs all tests for both repo and query builder controllers
@@ -111,6 +112,23 @@ let testFactory = new TestFactory();
 
 				expect(body.results.length).to.eq(1);
 				expect(body.results[0].id).to.eq(past.id);
+			});
+
+			it('can filter across relationships', async () => {
+				const test = await testFactory.create();
+				const related = await testRelatedFactory.create();
+				test.related = related;
+				await test.save();
+
+				let res = await supertest(app.getHttpServer())
+					.get(`/tests?filter=related.name__eq:${related.name}`);
+				let { body } = res;
+
+				expect(body.results.length).to.eq(1);
+
+				res = await supertest(app.getHttpServer())
+					.get(`/tests?filter=related.name__eq:NOTHINGSHOULDMATCH`);
+				expect(res.body.results.length).to.eq(0);
 			});
 
 			it('can sort', async () => {

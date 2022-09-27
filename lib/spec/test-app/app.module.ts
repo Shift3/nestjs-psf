@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
+import { TestRelated } from "./test-related.entity";
 import { Test } from "./test.entity";
 import { TestModule } from "./test.module";
 
@@ -10,7 +11,7 @@ import { TestModule } from "./test.module";
       username: process.env.DB_USER || undefined,
       host: 'localhost',
       database: 'nestjs-psf-tests',
-      entities: [Test],
+      entities: [Test, TestRelated],
       synchronize: true,
     }),
 
